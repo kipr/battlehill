@@ -1,7 +1,7 @@
-#include <battlecreek/msgs/motor_states.hpp>
-#include <battlecreek/msgs/servo_states.hpp>
-#include <battlecreek/msgs/digital_states.hpp>
-#include <battlecreek/msgs/analog_states.hpp>
+#include <battlecreek/motor_states.hpp>
+#include <battlecreek/servo_states.hpp>
+#include <battlecreek/digital_states.hpp>
+#include <battlecreek/analog_states.hpp>
 
 #include <daylite/node.hpp>
 #include <daylite/spinner.hpp>

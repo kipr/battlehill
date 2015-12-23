@@ -1,4 +1,4 @@
-find_path(BATTLECREEK_INCLUDE_DIR battlecreek/battlecreek.hpp)
+find_path(BATTLECREEK_INCLUDE_DIR battlecreek/motor_state.hpp)
 
 set(BATTLECREEK_INCLUDE_DIRS ${DAYLITE_INCLUDE_DIR})
 

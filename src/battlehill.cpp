@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
   auto n = node::create_node("battlehill");
   
-  if(!n->join_daylite("127.0.0.1", 8374))
+  if(!n->start("127.0.0.1", 8374))
   {
     cerr << "Failed to contact daylite master" << endl;
     return 1;

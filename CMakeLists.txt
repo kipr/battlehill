@@ -15,3 +15,10 @@ endif()
 include_directories(${BATTLECREEK_INCLUDE_DIR} ${DAYLITE_INCLUDE_DIRS})
 add_executable(battlehill ${BATTLEHILL_SOURCES})
 target_link_libraries(battlehill ${DAYLITE_LIBRARIES})
+
+
+################################################################################
+#   Install                                                                    #
+################################################################################
+
+install(TARGETS battlehill DESTINATION bin)

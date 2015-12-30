@@ -12,7 +12,6 @@
 #include "wallaby_p.hpp"
 
 #include <iostream>
-#include <functional>
 
 using namespace battlecreek;
 using namespace daylite;

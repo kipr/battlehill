@@ -2,6 +2,7 @@
 #include <battlecreek/battery_state.hpp>
 #include <battlecreek/digital_states.hpp>
 #include <battlecreek/motor_states.hpp>
+#include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
 
 #include <daylite/node.hpp>
@@ -11,6 +12,7 @@
 #include "wallaby_p.hpp"
 
 #include <iostream>
+#include <functional>
 
 using namespace battlecreek;
 using namespace daylite;
@@ -130,11 +132,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   
-  auto analog_states_pub = n->advertise("robot/analog_states");
-  auto battery_state_pub = n->advertise("robot/battery_state");
-  auto digital_states_pub = n->advertise("robot/digital_states");
-  auto motor_states_pub = n->advertise("robot/motor_states");
-  auto servo_states_pub = n->advertise("robot/servo_states");
+  auto robot_states_pub = n->advertise("robot/robot_states");
 
   auto set_analog_states_sub = n->subscribe("robot/set_analog_states", &set_analog_states_cb);
   auto set_digital_states_sub = n->subscribe("robot/set_digital_states", &set_digital_states_cb);
@@ -149,10 +147,10 @@ int main(int argc, char *argv[])
     blink_led();
 
     // publish battery voltage
-    battlecreek::battery_state battery_state;
-    battery_state.capacity = power_level();
-    std::cout << "batt voltage = " << std::to_string(battery_state.capacity) << std::endl;
-    battery_state_pub->publish(battery_state.bind());
+    battlecreek::robot_states robot_states;
+    robot_states.battery_state.capacity = power_level();
+    std::cout << "batt voltage = " << std::to_string(robot_states.battery_state.capacity) << std::endl;
+    robot_states_pub->publish(robot_states.bind());
 
     spinner::spin_once();
   }

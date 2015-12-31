@@ -10,6 +10,7 @@
 
 #include "battery.hpp"
 #include "led.hpp"
+#include "wallaby_p.hpp"
 
 #include <iostream>
 
@@ -86,9 +87,17 @@ int main(int argc, char *argv[])
   // TODO: remove digital pin config
   config_led();
 
+
+  auto wallaby = Private::Wallaby::instance();
+  const unsigned int read_buffer_size = wallaby->getBufferSize();
+
+  unsigned char * alt_read_buffer = new unsigned char[read_buffer_size];
+
   for(;;)
   {
     blink_led();
+
+    wallaby->readToAltBuffer(alt_read_buffer, read_buffer_size);
 
     // publish battery voltage
     battlecreek::robot_states robot_states;

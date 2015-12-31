@@ -8,6 +8,8 @@
 #ifndef SRC_WALLABY_P_HPP_
 #define SRC_WALLABY_P_HPP_
 
+#include <mutex>
+
 namespace Private
 {
 
@@ -17,30 +19,31 @@ class Wallaby
 public:
 	static Wallaby * instance();
 
-	unsigned char readRegister8b(unsigned char address);
+	unsigned char readRegister8b(unsigned char address, const unsigned char * alt_read_buffer = nullptr);
 	void writeRegister8b(unsigned char address, unsigned char value);
 
-	unsigned short readRegister16b(unsigned char address);
+	unsigned short readRegister16b(unsigned char address, const unsigned char * alt_read_buffer = nullptr);
 	void writeRegister16b(unsigned char address, unsigned short value);
 
-	unsigned int readRegister32b(unsigned char address);
+	unsigned int readRegister32b(unsigned char address, const unsigned char * alt_read_buffer = nullptr);
 	void writeRegister32b(unsigned char address, unsigned int value);
 
 	// for efficient bulk / low-level access:
-	void updateReadBuffer();
-	const char * getReadBuffer();
-	unsigned int getBufferSize();
+  unsigned int getBufferSize();
+	void readToAltBuffer(unsigned char * alt_read_buffer, unsigned int buffer_size);
 
 	virtual ~Wallaby();
 
 private:
 	Wallaby();
-	bool transfer();
+	bool transfer(unsigned char * alt_read_buffer = nullptr);
 	void clear_buffers();
 	int spi_fd_;
 	unsigned char * write_buffer_;
 	unsigned char * read_buffer_;
 	const unsigned int buffer_size_; // same size for read/write buffers
+
+	std::mutex transfer_mutex_;
 
 };
 

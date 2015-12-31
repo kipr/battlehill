@@ -60,7 +60,7 @@ Wallaby * Wallaby::instance()
 	return &instance;
 }
 
-bool Wallaby::transfer()
+bool Wallaby::transfer(unsigned char * alt_read_buffer)
 {
 	if (spi_fd_ <= 0) return false; // TODO: feedback
 
@@ -81,7 +81,7 @@ bool Wallaby::transfer()
 	xfer[0].len = buffer_size_;
 
 	int status = ioctl(spi_fd_, SPI_IOC_MESSAGE(1), xfer);
-	usleep(50); //this  makes sure we don't outrun the co-processor until interrupts are in place for DMA
+	usleep(50); //FIXME: this  makes sure we don't outrun the co-processor until interrupts are in place for DMA
 
 	if (read_buffer_[0] != 'J')
 	{
@@ -105,17 +105,22 @@ bool Wallaby::transfer()
 	return true;
 }
 
-unsigned char Wallaby::readRegister8b(unsigned char address)
+unsigned char Wallaby::readRegister8b(unsigned char address, const unsigned char * alt_read_buffer)
 {
 	if (address >= REG_READABLE_COUNT) return 0;// false; // TODO: feedback
 
-	clear_buffers();
+  const unsigned char * const buffer = (alt_read_buffer == nullptr) ? alt_read_buffer : read_buffer_;
 
-	//bool success = transfer();
-	//TODO: if (success == false) return false;
-	transfer();
+	if (alt_read_buffer == nullptr)
+	{
+    clear_buffers();
 
-	unsigned char value = read_buffer_[address];
+    //bool success = transfer();
+    //TODO: if (success == false) return false;
+    transfer();
+	}
+
+	unsigned char value = buffer[address];
 	return value;
 }
 
@@ -135,17 +140,22 @@ void Wallaby::writeRegister8b(unsigned char address, unsigned char value)
 	transfer();
 }
 
-unsigned short Wallaby::readRegister16b(unsigned char address)
+unsigned short Wallaby::readRegister16b(unsigned char address, const unsigned char * alt_read_buffer)
 {
 	if (address >= REG_READABLE_COUNT || address+1 >= REG_READABLE_COUNT) return 0;// false; // TODO: feedback
 
-	clear_buffers();
+  const unsigned char * const buffer = (alt_read_buffer == nullptr) ? alt_read_buffer : read_buffer_;
 
-	//TODO: bool success = transfer();
-	//return success;
-	transfer();
+  if (alt_read_buffer == nullptr)
+  {
+    clear_buffers();
 
-	unsigned short value = (static_cast<unsigned short>(read_buffer_[address]) << 8) | read_buffer_[address+1];
+    //TODO: bool success = transfer();
+    //return success;
+    transfer();
+  }
+
+	unsigned short value = (static_cast<unsigned short>(buffer[address]) << 8) | buffer[address+1];
 	return value;
 }
 
@@ -167,21 +177,26 @@ void Wallaby::writeRegister16b(unsigned char address, unsigned short value)
 	transfer();
 }
 
-unsigned int Wallaby::readRegister32b(unsigned char address)
+unsigned int Wallaby::readRegister32b(unsigned char address, const unsigned char * alt_read_buffer)
 {
 	if (address >= REG_READABLE_COUNT || address+3 >= REG_READABLE_COUNT) return 0;// false; // TODO: feedback
 
-	clear_buffers();
+  const unsigned char * const buffer = (alt_read_buffer == nullptr) ? alt_read_buffer : read_buffer_;
 
-	//TODO: bool success = transfer();
-	//return success;
-	transfer();
+  if (alt_read_buffer == nullptr)
+  {
+    clear_buffers();
+
+    //TODO: bool success = transfer();
+    //return success;
+    transfer();
+  }
 
 	unsigned int value =
-			  (static_cast<unsigned int>(read_buffer_[address]) << 24)
-			| (static_cast<unsigned int>(read_buffer_[address+1]) << 16)
-			| (static_cast<unsigned int>(read_buffer_[address+2]) << 8)
-			| (static_cast<unsigned int>(read_buffer_[address+3]));
+			  (static_cast<unsigned int>(buffer[address]) << 24)
+			| (static_cast<unsigned int>(buffer[address+1]) << 16)
+			| (static_cast<unsigned int>(buffer[address+2]) << 8)
+			| (static_cast<unsigned int>(buffer[address+3]));
 
 	return value;
 }
@@ -214,20 +229,23 @@ void Wallaby::clear_buffers()
 	memset(read_buffer_, 0, buffer_size_);
 }
 
-void Wallaby::updateReadBuffer()
-{
-  clear_buffers();
-  transfer();
-}
-
-const char * Wallaby::getReadBuffer()
-{
-  return read_buffer_;
-}
 
 unsigned int Wallaby::getBufferSize()
 {
   return buffer_size_;
+}
+
+void Wallaby::readToAltBuffer(unsigned char * alt_read_buffer, unsigned int buffer_size)
+{
+    if (buffer_size < buffer_size_)
+    {
+      std::cerr << "Error: readToAltBuffer has size" << buffer_size << " and needed to be at least " << buffer_size_ << std::endl;
+      return;
+    }
+
+    clear_buffers();
+
+    transfer(alt_read_buffer);
 }
 
 } /* namespace Private */

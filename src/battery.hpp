@@ -11,7 +11,7 @@
 
 
 
-unsigned short battery_raw_reading();
+unsigned short battery_raw_reading(unsigned char * alt_read_buffer = nullptr);
 
 // TODO: move to battery source/header
 // TODO: confusing, this should be % remaining, but currently returns a voltage approximation

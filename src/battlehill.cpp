@@ -101,12 +101,10 @@ int main(int argc, char *argv[])
 
     // publish battery voltage
     battlecreek::robot_states robot_states;
-    unsigned short batt_adc = battery_raw_reading();
+    unsigned short batt_adc = battery_raw_reading(alt_read_buffer);
     robot_states.battery_state.raw_adc = batt_adc;
     robot_states.battery_state.capacity = battery_power_level(batt_adc);
     robot_states_pub->publish(robot_states.bind());
-
-
 
     spinner::spin_once();
   }

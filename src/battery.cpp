@@ -10,9 +10,9 @@
 #include "wallaby_regs_p.hpp"
 #include "wallaby_p.hpp"
 
-unsigned short battery_raw_reading()
+unsigned short battery_raw_reading(unsigned char * alt_read_buffer)
 {
-  return Private::Wallaby::instance()->readRegister16b(REG_RW_BATT_H);
+  return Private::Wallaby::instance()->readRegister16b(REG_RW_BATT_H, alt_read_buffer);
 }
 
 // TODO: move to battery source/header

@@ -26,6 +26,11 @@ public:
 	unsigned int readRegister32b(unsigned char address);
 	void writeRegister32b(unsigned char address, unsigned int value);
 
+	// for efficient bulk / low-level access:
+	void updateReadBuffer();
+	const char * getReadBuffer();
+	unsigned int getBufferSize();
+
 	virtual ~Wallaby();
 
 private:
@@ -35,7 +40,7 @@ private:
 	int spi_fd_;
 	unsigned char * write_buffer_;
 	unsigned char * read_buffer_;
-	const unsigned int buffer_size_;
+	const unsigned int buffer_size_; // same size for read/write buffers
 
 };
 

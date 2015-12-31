@@ -214,4 +214,20 @@ void Wallaby::clear_buffers()
 	memset(read_buffer_, 0, buffer_size_);
 }
 
+void Wallaby::updateReadBuffer()
+{
+  clear_buffers();
+  transfer();
+}
+
+const char * Wallaby::getReadBuffer()
+{
+  return read_buffer_;
+}
+
+unsigned int Wallaby::getBufferSize()
+{
+  return buffer_size_;
+}
+
 } /* namespace Private */

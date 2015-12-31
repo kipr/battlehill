@@ -64,6 +64,8 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
 {
 	if (spi_fd_ <= 0) return false; // TODO: feedback
 
+  std::lock_guard<std::mutex> lock(transfer_mutex_);
+
 	// transfer counter - used to detect missed packets on co-proc side
 	static unsigned char count = 0;
 	count += 1;

@@ -55,14 +55,6 @@ namespace
 
     auto msg = msg_option.unwrap();
   }
-
-  void set_analog_states_cb(const bson_t *raw_msg, void *)
-  {
-    const auto msg_option = safe_unbind<analog_states>(raw_msg);
-    if(msg_option.none()) return;
-    
-    auto msg = msg_option.unwrap();
-  }
   
   void set_digital_states_cb(const bson_t *raw_msg, void *)
   {
@@ -87,7 +79,6 @@ int main(int argc, char *argv[])
   
   auto robot_states_pub = n->advertise("robot/robot_states");
 
-  auto set_analog_states_sub = n->subscribe("robot/set_analog_states", &set_analog_states_cb);
   auto set_digital_states_sub = n->subscribe("robot/set_digital_states", &set_digital_states_cb);
   auto set_motor_states_sub = n->subscribe("robot/set_motor_states", &set_motor_states_cb);
   auto set_servo_states_sub = n->subscribe("robot/set_servo_states", &set_servo_states_cb);

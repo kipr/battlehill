@@ -48,6 +48,13 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
+  void set_servo_states_cb(const bson_t *raw_msg, void *)
+  {
+    const auto msg_option = safe_unbind<servo_states>(raw_msg);
+    if(msg_option.none()) return;
+
+    auto msg = msg_option.unwrap();
+  }
 
   void set_analog_states_cb(const bson_t *raw_msg, void *)
   {

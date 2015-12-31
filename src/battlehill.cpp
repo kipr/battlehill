@@ -8,8 +8,8 @@
 #include <daylite/node.hpp>
 #include <daylite/spinner.hpp>
 
-#include "wallaby_regs_p.hpp"
-#include "wallaby_p.hpp"
+#include "battery.hpp"
+#include "led.hpp"
 
 #include <iostream>
 
@@ -18,7 +18,6 @@ using namespace daylite;
 using namespace std;
 
 
-static const unsigned int LED_PIN_NUM = 12;
 
 namespace
 {
@@ -49,14 +48,7 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_servo_states_cb(const bson_t *raw_msg, void *)
-  {
-    const auto msg_option = safe_unbind<servo_states>(raw_msg);
-    if(msg_option.none()) return;
-    
-    auto msg = msg_option.unwrap();
-  }
-  
+
   void set_analog_states_cb(const bson_t *raw_msg, void *)
   {
     const auto msg_option = safe_unbind<analog_states>(raw_msg);
@@ -74,51 +66,6 @@ namespace
   }
 }
 
-void config_led()
-{
-  unsigned short outputs = Private::Wallaby::instance()->readRegister16b(REG_RW_DIG_OE_H);
-
-  //  bit = 1 for output, 0 for input
-  outputs |= (1 << LED_PIN_NUM);
-
-  Private::Wallaby::instance()->writeRegister16b(REG_RW_DIG_OE_H, outputs);
-
-  usleep(1000);
-}
-
-// TODO: move/remove
-void blink_led()
-{
-
-  // led (on?)
-  unsigned short out;
-  out = Private::Wallaby::instance()->readRegister16b(REG_RW_DIG_OUT_H);
-  out |= (1 << LED_PIN_NUM);
-  Private::Wallaby::instance()->writeRegister16b(REG_RW_DIG_OUT_H, out);
-
-  usleep(20000);
-
-  // led (off?)
-  out = Private::Wallaby::instance()->readRegister16b(REG_RW_DIG_OUT_H);
-  out &= ~(1 << LED_PIN_NUM);
-  Private::Wallaby::instance()->writeRegister16b(REG_RW_DIG_OUT_H, out);
-  usleep(20000);
-}
-
-
-// TODO: move to battery source/header
-float power_level()
-{
-  // piece the 12-bit ADC result back together
-  unsigned short raw_batt_adc = Private::Wallaby::instance()->readRegister16b(REG_RW_BATT_H);
-
-  // calculate voltage based on linear curve-fitting
-  float batt_voltage = -0.02070635f + 0.009071161f * static_cast<float>(raw_batt_adc);
-
-  // FIXME   convert ADC->capacity  or  voltage->capacity
-
-  return batt_voltage;
-}
 
 
 int main(int argc, char *argv[])
@@ -147,9 +94,12 @@ int main(int argc, char *argv[])
 
     // publish battery voltage
     battlecreek::robot_states robot_states;
-    robot_states.battery_state.capacity = power_level();
-    std::cout << "batt voltage = " << std::to_string(robot_states.battery_state.capacity) << std::endl;
+    unsigned short batt_adc = battery_raw_reading();
+    robot_states.battery_state.raw_adc = batt_adc;
+    robot_states.battery_state.capacity = battery_power_level(batt_adc);
     robot_states_pub->publish(robot_states.bind());
+
+
 
     spinner::spin_once();
   }

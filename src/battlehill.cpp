@@ -29,7 +29,7 @@ namespace
 {
 
   template<typename T>
-  inline bson_bind::option<T> safe_unbind(const bson_t *raw_msg)
+  inline bson_bind::option<T> safe_unbind(const bson &raw_msg)
   {
     using namespace bson_bind;
     T ret;
@@ -46,7 +46,7 @@ namespace
     return some(ret);
   }
   
-  void set_motor_states_cb(const bson_t *raw_msg, void *)
+  void set_motor_states_cb(const bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<motor_states>(raw_msg);
     if(msg_option.none()) return;
@@ -54,7 +54,7 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_servo_states_cb(const bson_t *raw_msg, void *)
+  void set_servo_states_cb(const bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<servo_states>(raw_msg);
     if(msg_option.none()) return;
@@ -62,7 +62,7 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_digital_states_cb(const bson_t *raw_msg, void *)
+  void set_digital_states_cb(const bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<digital_states>(raw_msg);
     if(msg_option.none()) return;

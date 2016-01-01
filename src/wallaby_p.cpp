@@ -64,6 +64,9 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
 {
   if (spi_fd_ <= 0) return false; // TODO: feedback
 
+  const unsigned char * const read_buffer = (alt_read_buffer == nullptr) ? read_buffer_ : alt_read_buffer;
+
+
   std::lock_guard<std::mutex> lock(transfer_mutex_);
 
   // transfer counter - used to detect missed packets on co-proc side
@@ -79,19 +82,19 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
   memset(xfer, 0, sizeof xfer);
 
   xfer[0].tx_buf = (unsigned long) write_buffer_;
-  xfer[0].rx_buf = (unsigned long) read_buffer_;
+  xfer[0].rx_buf = (unsigned long) read_buffer;
   xfer[0].len = buffer_size_;
 
   int status = ioctl(spi_fd_, SPI_IOC_MESSAGE(1), xfer);
   usleep(50); //FIXME: this  makes sure we don't outrun the co-processor until interrupts are in place for DMA
 
-  if (read_buffer_[0] != 'J')
+  if (read_buffer[0] != 'J')
   {
     std::cerr << " Error: DMA de-synchronized" << std::endl;
 
     for (unsigned int i = 0; i < buffer_size_; ++i)
     {
-      std::cerr << std::hex << static_cast<unsigned int>(read_buffer_[i]) << " ";
+      std::cerr << std::hex << static_cast<unsigned int>(read_buffer[i]) << " ";
     }
     std::cerr << std::endl;
 

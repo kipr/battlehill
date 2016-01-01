@@ -128,16 +128,16 @@ int main(int argc, char *argv[])
     // digitals
 
     // gyro
-    robot_states.imu_state.gyro_state.x = gyro_x();
-    robot_states.imu_state.gyro_state.y = gyro_y();
-    robot_states.imu_state.gyro_state.z = gyro_z();
-    robot_states.imu_state.gyro_state.calibrated = gyro_calibrated();
+    robot_states.imu_state.gyro_state.x = gyro_x(alt_read_buffer);
+    robot_states.imu_state.gyro_state.y = gyro_y(alt_read_buffer);
+    robot_states.imu_state.gyro_state.z = gyro_z(alt_read_buffer);
+    robot_states.imu_state.gyro_state.calibrated = gyro_calibrated(alt_read_buffer);
 
     // magnetometer
-    robot_states.imu_state.magneto_state.x = magneto_x();
-    robot_states.imu_state.magneto_state.y = magneto_y();
-    robot_states.imu_state.magneto_state.z = magneto_z();
-    robot_states.imu_state.magneto_state.calibrated = magneto_calibrated();
+    robot_states.imu_state.magneto_state.x = magneto_x(alt_read_buffer);
+    robot_states.imu_state.magneto_state.y = magneto_y(alt_read_buffer);
+    robot_states.imu_state.magneto_state.z = magneto_z(alt_read_buffer);
+    robot_states.imu_state.magneto_state.calibrated = magneto_calibrated(alt_read_buffer);
 
     // motors
 

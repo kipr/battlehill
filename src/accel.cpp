@@ -10,19 +10,19 @@
 #include "wallaby_regs_p.hpp"
 
 
-short accel_x()
+short accel_x(unsigned char * alt_read_buffer)
 {
-    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_X_H));
+    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_X_H, alt_read_buffer));
 }
 
-short accel_y()
+short accel_y(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_Y_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_Y_H, alt_read_buffer));
 }
 
-short accel_z()
+short accel_z(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_Z_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_ACCEL_Z_H, alt_read_buffer));
 }
 
 bool accel_calibrate()
@@ -31,7 +31,7 @@ bool accel_calibrate()
   return true;
 }
 
-bool accel_calibrated()
+bool accel_calibrated(unsigned char * alt_read_buffer)
 {
   // TODO
   return true;

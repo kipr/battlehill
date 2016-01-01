@@ -10,19 +10,19 @@
 #include "wallaby_regs_p.hpp"
 
 
-short gyro_x()
+short gyro_x(unsigned char * alt_read_buffer)
 {
-    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_X_H));
+    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_X_H, alt_read_buffer));
 }
 
-short gyro_y()
+short gyro_y(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_Y_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_Y_H, alt_read_buffer));
 }
 
-short gyro_z()
+short gyro_z(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_Z_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_GYRO_Z_H, alt_read_buffer));
 }
 
 bool gyro_calibrate()
@@ -31,7 +31,7 @@ bool gyro_calibrate()
   return true;
 }
 
-bool gyro_calibrated()
+bool gyro_calibrated(unsigned char * alt_read_buffer)
 {
   // TODO
   return true;

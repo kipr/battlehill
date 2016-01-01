@@ -12,19 +12,19 @@
 #include "wallaby_regs_p.hpp"
 
 
-short magneto_x()
+short magneto_x(unsigned char * alt_read_buffer)
 {
-    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_X_H));
+    return static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_X_H, alt_read_buffer));
 }
 
-short magneto_y()
+short magneto_y(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_Y_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_Y_H, alt_read_buffer));
 }
 
-short magneto_z()
+short magneto_z(unsigned char * alt_read_buffer)
 {
-  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_Z_H));
+  signed short val = static_cast<signed short>(Private::Wallaby::instance()->readRegister16b(REG_RW_MAG_Z_H, alt_read_buffer));
 }
 
 bool magneto_calibrate()
@@ -33,7 +33,7 @@ bool magneto_calibrate()
   return true;
 }
 
-bool magneto_calibrated()
+bool magneto_calibrated(unsigned char * alt_read_buffer)
 {
   // TODO
   return true;

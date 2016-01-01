@@ -110,10 +110,10 @@ int main(int argc, char *argv[])
     // update all of the robot state data
 
     // accelerometer
-    robot_states.imu_state.accel_state.x = accel_x();
-    robot_states.imu_state.accel_state.y = accel_y();
-    robot_states.imu_state.accel_state.z = accel_z();
-    robot_states.imu_state.accel_state.calibrated = accel_calibrated();
+    robot_states.imu_state.accel_state.x = accel_x(alt_read_buffer);
+    robot_states.imu_state.accel_state.y = accel_y(alt_read_buffer);
+    robot_states.imu_state.accel_state.z = accel_z(alt_read_buffer);
+    robot_states.imu_state.accel_state.calibrated = accel_calibrated(alt_read_buffer);
 
     // analog
     for (unsigned int i = 0; i < NUM_ADC; ++i) robot_states.analog_states.value[i] = analog_value(i, alt_read_buffer);

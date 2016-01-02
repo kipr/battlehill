@@ -5,12 +5,14 @@
 #include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
 
+#include <daylite/bson.hpp>
 #include <daylite/node.hpp>
 #include <daylite/spinner.hpp>
 
 #include "accel.hpp"
 #include "analog.hpp"
 #include "battery.hpp"
+#include "digital.hpp"
 #include "gyro.hpp"
 #include "led.hpp"
 #include "magneto.hpp"
@@ -24,12 +26,13 @@ using namespace std;
 
 
 static const unsigned int NUM_ADC = 6; // TODO: move
+static const unsigned int NUM_DIG = 16; // TODO: move
 
 namespace
 {
 
   template<typename T>
-  inline bson_bind::option<T> safe_unbind(const bson &raw_msg)
+  inline bson_bind::option<T> safe_unbind(const daylite::bson &raw_msg)
   {
     using namespace bson_bind;
     T ret;
@@ -46,7 +49,7 @@ namespace
     return some(ret);
   }
   
-  void set_motor_states_cb(const bson & raw_msg, void *)
+  void set_motor_states_cb(const daylite::bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<motor_states>(raw_msg);
     if(msg_option.none()) return;
@@ -54,7 +57,7 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_servo_states_cb(const bson & raw_msg, void *)
+  void set_servo_states_cb(const daylite::bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<servo_states>(raw_msg);
     if(msg_option.none()) return;
@@ -62,7 +65,7 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_digital_states_cb(const bson & raw_msg, void *)
+  void set_digital_states_cb(const daylite::bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<digital_states>(raw_msg);
     if(msg_option.none()) return;
@@ -100,6 +103,8 @@ int main(int argc, char *argv[])
 
   battlecreek::robot_states robot_states;
   robot_states.analog_states.value.resize(NUM_ADC);
+  robot_states.digital_states.value.resize(NUM_DIG);
+  robot_states.digital_states.output.resize(NUM_DIG);
 
   for(;;)
   {
@@ -126,6 +131,11 @@ int main(int argc, char *argv[])
     // buttons
 
     // digitals
+    for (unsigned int i = 0; i < NUM_DIG; ++i)
+    {
+      robot_states.digital_states.value[i] = digital_value(i, alt_read_buffer);
+      robot_states.digital_states.output[i] = digital_output(i, alt_read_buffer);
+    }
 
     // gyro
     robot_states.imu_state.gyro_state.x = gyro_x(alt_read_buffer);

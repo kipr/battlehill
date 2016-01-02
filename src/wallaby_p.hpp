@@ -32,6 +32,8 @@ public:
   unsigned int getBufferSize();
 	void readToAltBuffer(unsigned char * alt_read_buffer, unsigned int buffer_size);
 
+	unsigned long int getUpdateCount() const;
+
 	virtual ~Wallaby();
 
 private:
@@ -42,7 +44,7 @@ private:
 	unsigned char * write_buffer_;
 	unsigned char * read_buffer_;
 	const unsigned int buffer_size_; // same size for read/write buffers
-
+	unsigned long int update_count_;
 	std::mutex transfer_mutex_;
 
 };

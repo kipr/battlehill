@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
   robot_states.digital_states.value.resize(NUM_DIG);
   robot_states.digital_states.output.resize(NUM_DIG);
 
+  unsigned long int robot_states_pub_count = 0;
+
   for(;;)
   {
 
@@ -172,6 +174,9 @@ int main(int argc, char *argv[])
     // servos
 
     // publish robot state data
+    robot_states_pub_count += 1;
+    robot_states.seq = robot_states_pub_count;
+    robot_states.update_count = Private::Wallaby::instance()->getUpdateCount();
     robot_states_pub->publish(robot_states.bind());
 
     // check for new messages

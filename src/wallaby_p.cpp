@@ -32,7 +32,8 @@ namespace Private
 Wallaby::Wallaby()
 : buffer_size_(REG_READABLE_COUNT),
   read_buffer_(new unsigned char[REG_READABLE_COUNT]),
-  write_buffer_(new unsigned char[REG_READABLE_COUNT])
+  write_buffer_(new unsigned char[REG_READABLE_COUNT]),
+  update_count_(0)
 {
   static const std::string WALLABY_SPI_PATH = "/dev/spidev2.0";
 
@@ -86,6 +87,7 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
   xfer[0].len = buffer_size_;
 
   int status = ioctl(spi_fd_, SPI_IOC_MESSAGE(1), xfer);
+  update_count_ += 1;
   usleep(50); //FIXME: this  makes sure we don't outrun the co-processor until interrupts are in place for DMA
 
   if (read_buffer[0] != 'J')
@@ -252,5 +254,11 @@ void Wallaby::readToAltBuffer(unsigned char * alt_read_buffer, unsigned int buff
 
   transfer(alt_read_buffer);
 }
+
+unsigned long int Wallaby::getUpdateCount() const
+{
+  return update_count_;
+}
+
 
 } /* namespace Private */

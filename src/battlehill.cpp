@@ -4,6 +4,8 @@
 #include <battlecreek/motor_states.hpp>
 #include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
+#include <battlecreek/set_digital_state.hpp>
+
 
 #include <daylite/bson.hpp>
 #include <daylite/node.hpp>
@@ -65,13 +67,29 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_digital_states_cb(const daylite::bson & raw_msg, void *)
+  void set_digital_state_cb(const daylite::bson & raw_msg, void *)
   {
-    const auto msg_option = safe_unbind<digital_states>(raw_msg);
+    const auto msg_option = safe_unbind<set_digital_state>(raw_msg);
     if(msg_option.none()) return;
     
     auto msg = msg_option.unwrap();
+
+    unsigned char port = msg.port;
+
+    // TODO: better range checking and feedback
+    if (port >= NUM_DIG) return;
+
+    if (msg.output.some())
+    {
+      set_digital_direction(port, msg.output.unwrap());
+    }
+
+    if (msg.value.some())
+    {
+      set_digital_value(port, msg.value.unwrap());
+    }
   }
+
 }
 
 
@@ -88,7 +106,7 @@ int main(int argc, char *argv[])
   
   auto robot_states_pub = n->advertise("robot/robot_states");
 
-  auto set_digital_states_sub = n->subscribe("robot/set_digital_states", &set_digital_states_cb);
+  auto set_digital_state_sub = n->subscribe("robot/set_digital_state", &set_digital_state_cb);
   auto set_motor_states_sub = n->subscribe("robot/set_motor_states", &set_motor_states_cb);
   auto set_servo_states_sub = n->subscribe("robot/set_servo_states", &set_servo_states_cb);
   

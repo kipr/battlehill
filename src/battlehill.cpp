@@ -5,6 +5,7 @@
 #include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
 #include <battlecreek/set_digital_state.hpp>
+#include <battlecreek/set_servo_state.hpp>
 
 
 #include <daylite/bson.hpp>
@@ -18,6 +19,7 @@
 #include "gyro.hpp"
 #include "led.hpp"
 #include "magneto.hpp"
+#include "servo.hpp"
 #include "wallaby_p.hpp"
 
 #include <iostream>
@@ -29,6 +31,8 @@ using namespace std;
 
 static const unsigned int NUM_ADC = 6; // TODO: move
 static const unsigned int NUM_DIG = 16; // TODO: move
+static const unsigned int NUM_SERVOS = 4; // TODO: move
+static const unsigned int NUM_MOTORS = 4; //TODO: move
 
 namespace
 {
@@ -51,7 +55,7 @@ namespace
     return some(ret);
   }
   
-  void set_motor_states_cb(const daylite::bson & raw_msg, void *)
+  void set_motor_state_cb(const daylite::bson & raw_msg, void *)
   {
     const auto msg_option = safe_unbind<motor_states>(raw_msg);
     if(msg_option.none()) return;
@@ -59,12 +63,21 @@ namespace
     auto msg = msg_option.unwrap();
   }
   
-  void set_servo_states_cb(const daylite::bson & raw_msg, void *)
+  void set_servo_state_cb(const daylite::bson & raw_msg, void *)
   {
-    const auto msg_option = safe_unbind<servo_states>(raw_msg);
+    const auto msg_option = safe_unbind<set_servo_state>(raw_msg);
     if(msg_option.none()) return;
 
     auto msg = msg_option.unwrap();
+
+    unsigned char port = msg.port;
+
+    // TODO: better range checking and feedback
+    if (port >= NUM_SERVOS) return;
+
+    if (msg.position.some()) set_servo_position(port, msg.position.unwrap());
+
+    if (msg.enabled.some()) set_servo_enabled(port, msg.enabled.unwrap());
   }
   
   void set_digital_state_cb(const daylite::bson & raw_msg, void *)
@@ -79,15 +92,9 @@ namespace
     // TODO: better range checking and feedback
     if (port >= NUM_DIG) return;
 
-    if (msg.output.some())
-    {
-      set_digital_direction(port, msg.output.unwrap());
-    }
+    if (msg.output.some()) set_digital_direction(port, msg.output.unwrap());
 
-    if (msg.value.some())
-    {
-      set_digital_value(port, msg.value.unwrap());
-    }
+    if (msg.value.some()) set_digital_value(port, msg.value.unwrap());
   }
 
 }
@@ -107,8 +114,8 @@ int main(int argc, char *argv[])
   auto robot_states_pub = n->advertise("robot/robot_states");
 
   auto set_digital_state_sub = n->subscribe("robot/set_digital_state", &set_digital_state_cb);
-  auto set_motor_states_sub = n->subscribe("robot/set_motor_states", &set_motor_states_cb);
-  auto set_servo_states_sub = n->subscribe("robot/set_servo_states", &set_servo_states_cb);
+  auto set_motor_states_sub = n->subscribe("robot/set_motor_state", &set_motor_state_cb);
+  auto set_servo_states_sub = n->subscribe("robot/set_servo_state", &set_servo_state_cb);
   
   // TODO: remove digital pin config
   config_led();
@@ -123,6 +130,8 @@ int main(int argc, char *argv[])
   robot_states.analog_states.value.resize(NUM_ADC);
   robot_states.digital_states.value.resize(NUM_DIG);
   robot_states.digital_states.output.resize(NUM_DIG);
+  robot_states.servo_states.enabled.resize(NUM_SERVOS);
+  robot_states.servo_states.position.resize(NUM_SERVOS);
 
   unsigned long int robot_states_pub_count = 0;
 
@@ -172,6 +181,11 @@ int main(int argc, char *argv[])
     // motors
 
     // servos
+    for (unsigned int i = 0; i < NUM_SERVOS; ++i)
+    {
+      robot_states.servo_states.enabled[i] = get_servo_enabled(i, alt_read_buffer);
+      robot_states.servo_states.position[i] = get_servo_position(i, alt_read_buffer);
+    }
 
     // publish robot state data
     robot_states_pub_count += 1;

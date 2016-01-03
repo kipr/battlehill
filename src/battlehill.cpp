@@ -7,7 +7,7 @@
 #include <battlecreek/set_digital_state.hpp>
 #include <battlecreek/set_motor_state.hpp>
 #include <battlecreek/set_servo_state.hpp>
-
+#include <battlecreek/set_pid_state.hpp>
 
 #include <daylite/bson.hpp>
 #include <daylite/node.hpp>
@@ -85,6 +85,21 @@ namespace
     if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
 
   }
+
+  void set_pid_state_cb(const daylite::bson & raw_msg, void *)
+  {
+    const auto msg_option = safe_unbind<set_pid_state>(raw_msg);
+    if(msg_option.none()) return;
+
+    auto msg = msg_option.unwrap();
+
+    unsigned char port = msg.port;
+
+    // TODO: better range checking and feedback
+    if (port >= NUM_MOTORS) return;
+
+    set_motor_pid_gains(port, msg.p, msg.i, msg.d, msg.pd, msg.id, msg.dd);
+  }
   
   void set_servo_state_cb(const daylite::bson & raw_msg, void *)
   {
@@ -139,8 +154,10 @@ int main(int argc, char *argv[])
 
   auto set_digital_state_sub = n->subscribe("robot/set_digital_state", &set_digital_state_cb);
   auto set_motor_states_sub = n->subscribe("robot/set_motor_state", &set_motor_state_cb);
+  auto set_pid_states_sub = n->subscribe("robot/set_pid_state", &set_pid_state_cb);
   auto set_servo_states_sub = n->subscribe("robot/set_servo_state", &set_servo_state_cb);
   
+
   // TODO: remove digital pin config
   config_led();
 
@@ -157,6 +174,7 @@ int main(int argc, char *argv[])
   robot_states.servo_states.enabled.resize(NUM_SERVOS);
   robot_states.servo_states.position.resize(NUM_SERVOS);
   robot_states.motor_states.motor_state.resize(NUM_MOTORS);
+
 
   unsigned long int robot_states_pub_count = 0;
 
@@ -216,6 +234,15 @@ int main(int argc, char *argv[])
       robot_states.motor_states.motor_state[i].power = get_motor_pwm(i, alt_read_buffer);
       robot_states.motor_states.motor_state[i].stop = get_motor_stop(i, alt_read_buffer);
       robot_states.motor_states.motor_state[i].velocity = get_motor_bemf_vel(i, alt_read_buffer);
+
+      short kp,ki,kd,kpd,kid,kdd;
+      get_pid_gains(i,kp,ki,kd,kpd,kid,kdd);
+      robot_states.pid_states.pid_state[i].p = kp;
+      robot_states.pid_states.pid_state[i].i = ki;
+      robot_states.pid_states.pid_state[i].d = kd;
+      robot_states.pid_states.pid_state[i].pd = kpd;
+      robot_states.pid_states.pid_state[i].id = kid;
+      robot_states.pid_states.pid_state[i].dd = kdd;
     }
 
     // servos

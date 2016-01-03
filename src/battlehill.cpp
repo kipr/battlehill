@@ -176,7 +176,6 @@ int main(int argc, char *argv[])
   robot_states.motor_states.motor_state.resize(NUM_MOTORS);
   robot_states.pid_states.pid_state.resize(NUM_MOTORS);
 
-
   unsigned long int robot_states_pub_count = 0;
 
   for(;;)
@@ -261,6 +260,8 @@ int main(int argc, char *argv[])
 
     // check for new messages
     spinner::spin_once();
+
+    sleep(1500);
   }
   
   return 0;

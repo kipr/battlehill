@@ -67,7 +67,7 @@ namespace
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
-    std::cout << "port " << std::endl;
+    std::cout << "port " << std::to_string(port) << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_MOTORS) return;
@@ -99,7 +99,7 @@ namespace
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
-    std::cout << "port " << std::endl;
+    std::cout << "port " << std::to_string(port) << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_MOTORS) return;
@@ -117,7 +117,7 @@ namespace
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
-    std::cout << "port " << std::endl;
+    std::cout << "port " << std::to_string(port) << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_SERVOS) return;
@@ -137,7 +137,7 @@ namespace
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
-    std::cout << "port " << std::endl;
+    std::cout << "port " << std::to_string(port) << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_DIG) return;

@@ -174,6 +174,7 @@ int main(int argc, char *argv[])
   robot_states.servo_states.enabled.resize(NUM_SERVOS);
   robot_states.servo_states.position.resize(NUM_SERVOS);
   robot_states.motor_states.motor_state.resize(NUM_MOTORS);
+  robot_states.pid_states.pid_state.resize(NUM_MOTORS);
 
 
   unsigned long int robot_states_pub_count = 0;

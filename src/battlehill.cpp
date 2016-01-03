@@ -77,7 +77,7 @@ namespace
 
     if (msg.reset_position.some() && msg.reset_position.unwrap()) clear_motor_bemf(port);
 
-    if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
+    if (msg.direction.some()) set_motor_direction(port, msg.direction.unwrap());
 
     if (msg.mode.some()) set_motor_mode(port, msg.mode.unwrap());
 

@@ -19,6 +19,7 @@
 #include "gyro.hpp"
 #include "led.hpp"
 #include "magneto.hpp"
+#include "motor.hpp"
 #include "servo.hpp"
 #include "wallaby_p.hpp"
 
@@ -133,6 +134,7 @@ int main(int argc, char *argv[])
   robot_states.digital_states.output.resize(NUM_DIG);
   robot_states.servo_states.enabled.resize(NUM_SERVOS);
   robot_states.servo_states.position.resize(NUM_SERVOS);
+  robot_states.motor_states.motor_state.resize(NUM_MOTORS);
 
   unsigned long int robot_states_pub_count = 0;
 
@@ -180,6 +182,19 @@ int main(int argc, char *argv[])
     robot_states.imu_state.magneto_state.calibrated = magneto_calibrated(alt_read_buffer);
 
     // motors
+    for (unsigned int i = 0; i < NUM_MOTORS; ++i)
+    {
+      robot_states.motor_states.motor_state[i].direction = get_motor_direction(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].done = get_motor_done(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].goal_position = get_motor_goal_position(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].goal_velocity = get_motor_goal_velocity(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].mode = get_motor_mode(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].pid_active = get_motor_pid_active(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].position = get_motor_bemf(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].power = get_motor_pwm(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].stop = get_motor_stop(i, alt_read_buffer);
+      robot_states.motor_states.motor_state[i].velocity = get_motor_bemf_vel(i, alt_read_buffer);
+    }
 
     // servos
     for (unsigned int i = 0; i < NUM_SERVOS; ++i)

@@ -59,12 +59,15 @@ namespace
   
   void set_motor_state_cb(const daylite::bson & raw_msg, void *)
   {
+    std::cout << "set_motor_state_cb()" << std::endl;
+
     const auto msg_option = safe_unbind<set_motor_state>(raw_msg);
     if(msg_option.none()) return;
     
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
+    std::cout << "port " << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_MOTORS) return;
@@ -88,12 +91,15 @@ namespace
 
   void set_pid_state_cb(const daylite::bson & raw_msg, void *)
   {
+    std::cout << "set_pid_state_cb()" << std::endl;
+
     const auto msg_option = safe_unbind<set_pid_state>(raw_msg);
     if(msg_option.none()) return;
 
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
+    std::cout << "port " << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_MOTORS) return;
@@ -103,12 +109,15 @@ namespace
   
   void set_servo_state_cb(const daylite::bson & raw_msg, void *)
   {
+    std::cout << "set_servo_state_cb()" << std::endl;
+
     const auto msg_option = safe_unbind<set_servo_state>(raw_msg);
     if(msg_option.none()) return;
 
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
+    std::cout << "port " << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_SERVOS) return;
@@ -120,12 +129,15 @@ namespace
   
   void set_digital_state_cb(const daylite::bson & raw_msg, void *)
   {
+    std::cout << "set_digital_state_cb()" << std::endl;
+
     const auto msg_option = safe_unbind<set_digital_state>(raw_msg);
     if(msg_option.none()) return;
     
     auto msg = msg_option.unwrap();
 
     unsigned char port = msg.port;
+    std::cout << "port " << std::endl;
 
     // TODO: better range checking and feedback
     if (port >= NUM_DIG) return;

@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
     // check for new messages
     spinner::spin_once();
 
-    usleep(1500);
+    usleep(1);
   }
   
   return 0;

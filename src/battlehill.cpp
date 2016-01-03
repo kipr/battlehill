@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
   }
   
   auto robot_states_pub = n->advertise("robot/robot_states");
+  robot_states_pub->set_firehose(true);
 
   auto set_digital_state_sub = n->subscribe("robot/set_digital_state", &set_digital_state_cb);
   auto set_motor_states_sub = n->subscribe("robot/set_motor_state", &set_motor_state_cb);

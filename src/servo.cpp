@@ -37,7 +37,7 @@ bool get_servo_enabled(int port, unsigned char * alt_read_buffer)
 {
   if (port > 3) return false;
 
-  unsigned short allStop = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
+  unsigned short allStop = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP, alt_read_buffer);
 
   const unsigned short bit = 1 << (port + 4);
   const bool currentlyEnabled = allStop & bit;
@@ -66,7 +66,7 @@ unsigned short get_servo_position(int port, unsigned char * alt_read_buffer)
   if (port > 3) return 0xFFFF;
 
   unsigned char address = REG_RW_SERVO_0_H + 2 * port;
-  const unsigned short position = Private::Wallaby::instance()->readRegister16b(address);
+  const unsigned short position = Private::Wallaby::instance()->readRegister16b(address, alt_read_buffer);
 
   double degrees = ((double)position - 1500.0) / 10.0; // [-90, 90]
   double dval = (degrees + 90.0)  * 1023.0 / 180.0; // [0, 1023]

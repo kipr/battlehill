@@ -249,7 +249,7 @@ bool set_motor_stop(unsigned int port, bool stop)
 bool get_motor_done(unsigned int port, unsigned char * alt_read_buffer)
 {
   if (port >= NUM_MOTORS) return false;
-  unsigned char motors_done = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_DONE);
+  unsigned char motors_done = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_DONE, alt_read_buffer);
   return (motors_done & (1 < port));
 }
 

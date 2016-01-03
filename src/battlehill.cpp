@@ -5,6 +5,7 @@
 #include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
 #include <battlecreek/set_digital_state.hpp>
+#include <battlecreek/set_motor_state.hpp>
 #include <battlecreek/set_servo_state.hpp>
 
 
@@ -58,10 +59,31 @@ namespace
   
   void set_motor_state_cb(const daylite::bson & raw_msg, void *)
   {
-    const auto msg_option = safe_unbind<motor_states>(raw_msg);
+    const auto msg_option = safe_unbind<set_motor_state>(raw_msg);
     if(msg_option.none()) return;
     
     auto msg = msg_option.unwrap();
+
+    unsigned char port = msg.port;
+
+    // TODO: better range checking and feedback
+    if (port >= NUM_MOTORS) return;
+
+
+    if (msg.position_goal.some()) set_motor_goal_position(port, msg.position_goal.unwrap());
+    if (msg.velocity_goal.some()) set_motor_goal_velocity(port, msg.velocity_goal.unwrap());
+
+    if (msg.power.some()) set_motor_pwm(port, msg.power.unwrap());
+
+    if (msg.reset_position.some() && msg.reset_position.unwrap()) clear_motor_bemf(port);
+
+    if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
+
+    if (msg.mode.some()) set_motor_mode(port, msg.mode.unwrap());
+
+    // TODO: should we handle other logic differently if stop is set?, should this happen first or last?
+    if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
+
   }
   
   void set_servo_state_cb(const daylite::bson & raw_msg, void *)

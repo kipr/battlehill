@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
   auto robot_states_pub = n->advertise("robot/robot_states");
   robot_states_pub->set_firehose(true);
 
-  auto battlehill_state_pub = n->advertise("battlehill/battlehill_stats");
+  auto battlehill_state_pub = n->advertise("battlehill/battlehill_state");
   battlehill_state_pub->set_firehose(true);
 
   auto set_battlehill_state_sub = n->subscribe("battlehill/set_battlehill_state", &set_battlehill_state_cb);

@@ -25,6 +25,8 @@
 #include "wallaby_p.hpp"
 
 #include <iostream>
+#include <cstdlib>
+#include <chrono>
 
 using namespace battlecreek;
 using namespace daylite;
@@ -35,117 +37,119 @@ static const unsigned int NUM_ADC = 6; // TODO: move
 static const unsigned int NUM_DIG = 16; // TODO: move
 static const unsigned int NUM_SERVOS = 4; // TODO: move
 static const unsigned int NUM_MOTORS = 4; //TODO: move
+static const double WAV_CYCLE_TIME = 5.0;
+static const float LOW_VOLT_WARN_THRESH = 5.5f;
 
 namespace
 {
 
-  template<typename T>
-  inline bson_bind::option<T> safe_unbind(const daylite::bson &raw_msg)
+template<typename T>
+inline bson_bind::option<T> safe_unbind(const daylite::bson &raw_msg)
+{
+  using namespace bson_bind;
+  T ret;
+  try
   {
-    using namespace bson_bind;
-    T ret;
-    try
-    {
-      ret = T::unbind(raw_msg);
-    }
-    catch(const invalid_argument &e)
-    {
-      cerr << e.what() << endl;
-      return none<T>();
-    }
-    
-    return some(ret);
+    ret = T::unbind(raw_msg);
   }
-  
-  void set_motor_state_cb(const daylite::bson & raw_msg, void *)
+  catch(const invalid_argument &e)
   {
-    std::cout << "set_motor_state_cb()" << std::endl;
-
-    const auto msg_option = safe_unbind<set_motor_state>(raw_msg);
-    if(msg_option.none()) return;
-    
-    auto msg = msg_option.unwrap();
-
-    unsigned char port = msg.port;
-    std::cout << "port " << std::to_string(port) << std::endl;
-
-    // TODO: better range checking and feedback
-    if (port >= NUM_MOTORS) return;
-
-
-    if (msg.position_goal.some()) set_motor_goal_position(port, msg.position_goal.unwrap());
-    if (msg.velocity_goal.some()) set_motor_goal_velocity(port, msg.velocity_goal.unwrap());
-
-    if (msg.power.some()) set_motor_pwm(port, msg.power.unwrap());
-
-    if (msg.reset_position.some() && msg.reset_position.unwrap()) clear_motor_bemf(port);
-
-    if (msg.direction.some()) set_motor_direction(port, msg.direction.unwrap());
-
-    if (msg.mode.some()) set_motor_mode(port, msg.mode.unwrap());
-
-    // TODO: should we handle other logic differently if stop is set?, should this happen first or last?
-    if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
-
+    cerr << e.what() << endl;
+    return none<T>();
   }
 
-  void set_pid_state_cb(const daylite::bson & raw_msg, void *)
-  {
-    std::cout << "set_pid_state_cb()" << std::endl;
+  return some(ret);
+}
 
-    const auto msg_option = safe_unbind<set_pid_state>(raw_msg);
-    if(msg_option.none()) return;
+void set_motor_state_cb(const daylite::bson & raw_msg, void *)
+{
+  std::cout << "set_motor_state_cb()" << std::endl;
 
-    auto msg = msg_option.unwrap();
+  const auto msg_option = safe_unbind<set_motor_state>(raw_msg);
+  if(msg_option.none()) return;
 
-    unsigned char port = msg.port;
-    std::cout << "port " << std::to_string(port) << std::endl;
+  auto msg = msg_option.unwrap();
 
-    // TODO: better range checking and feedback
-    if (port >= NUM_MOTORS) return;
+  unsigned char port = msg.port;
+  std::cout << "port " << std::to_string(port) << std::endl;
 
-    set_motor_pid_gains(port, msg.p, msg.i, msg.d, msg.pd, msg.id, msg.dd);
-  }
-  
-  void set_servo_state_cb(const daylite::bson & raw_msg, void *)
-  {
-    std::cout << "set_servo_state_cb()" << std::endl;
+  // TODO: better range checking and feedback
+  if (port >= NUM_MOTORS) return;
 
-    const auto msg_option = safe_unbind<set_servo_state>(raw_msg);
-    if(msg_option.none()) return;
 
-    auto msg = msg_option.unwrap();
+  if (msg.position_goal.some()) set_motor_goal_position(port, msg.position_goal.unwrap());
+  if (msg.velocity_goal.some()) set_motor_goal_velocity(port, msg.velocity_goal.unwrap());
 
-    unsigned char port = msg.port;
-    std::cout << "port " << std::to_string(port) << std::endl;
+  if (msg.power.some()) set_motor_pwm(port, msg.power.unwrap());
 
-    // TODO: better range checking and feedback
-    if (port >= NUM_SERVOS) return;
+  if (msg.reset_position.some() && msg.reset_position.unwrap()) clear_motor_bemf(port);
 
-    if (msg.position.some()) set_servo_position(port, msg.position.unwrap());
+  if (msg.direction.some()) set_motor_direction(port, msg.direction.unwrap());
 
-    if (msg.enabled.some()) set_servo_enabled(port, msg.enabled.unwrap());
-  }
-  
-  void set_digital_state_cb(const daylite::bson & raw_msg, void *)
-  {
-    std::cout << "set_digital_state_cb()" << std::endl;
+  if (msg.mode.some()) set_motor_mode(port, msg.mode.unwrap());
 
-    const auto msg_option = safe_unbind<set_digital_state>(raw_msg);
-    if(msg_option.none()) return;
-    
-    auto msg = msg_option.unwrap();
+  // TODO: should we handle other logic differently if stop is set?, should this happen first or last?
+  if (msg.stop.some()) set_motor_stop(port, msg.stop.unwrap());
 
-    unsigned char port = msg.port;
-    std::cout << "port " << std::to_string(port) << std::endl;
+}
 
-    // TODO: better range checking and feedback
-    if (port >= NUM_DIG) return;
+void set_pid_state_cb(const daylite::bson & raw_msg, void *)
+{
+  std::cout << "set_pid_state_cb()" << std::endl;
 
-    if (msg.output.some()) set_digital_direction(port, msg.output.unwrap());
+  const auto msg_option = safe_unbind<set_pid_state>(raw_msg);
+  if(msg_option.none()) return;
 
-    if (msg.value.some()) set_digital_value(port, msg.value.unwrap());
-  }
+  auto msg = msg_option.unwrap();
+
+  unsigned char port = msg.port;
+  std::cout << "port " << std::to_string(port) << std::endl;
+
+  // TODO: better range checking and feedback
+  if (port >= NUM_MOTORS) return;
+
+  set_motor_pid_gains(port, msg.p, msg.i, msg.d, msg.pd, msg.id, msg.dd);
+}
+
+void set_servo_state_cb(const daylite::bson & raw_msg, void *)
+{
+  std::cout << "set_servo_state_cb()" << std::endl;
+
+  const auto msg_option = safe_unbind<set_servo_state>(raw_msg);
+  if(msg_option.none()) return;
+
+  auto msg = msg_option.unwrap();
+
+  unsigned char port = msg.port;
+  std::cout << "port " << std::to_string(port) << std::endl;
+
+  // TODO: better range checking and feedback
+  if (port >= NUM_SERVOS) return;
+
+  if (msg.position.some()) set_servo_position(port, msg.position.unwrap());
+
+  if (msg.enabled.some()) set_servo_enabled(port, msg.enabled.unwrap());
+}
+
+void set_digital_state_cb(const daylite::bson & raw_msg, void *)
+{
+  std::cout << "set_digital_state_cb()" << std::endl;
+
+  const auto msg_option = safe_unbind<set_digital_state>(raw_msg);
+  if(msg_option.none()) return;
+
+  auto msg = msg_option.unwrap();
+
+  unsigned char port = msg.port;
+  std::cout << "port " << std::to_string(port) << std::endl;
+
+  // TODO: better range checking and feedback
+  if (port >= NUM_DIG) return;
+
+  if (msg.output.some()) set_digital_direction(port, msg.output.unwrap());
+
+  if (msg.value.some()) set_digital_value(port, msg.value.unwrap());
+}
 
 }
 
@@ -154,13 +158,13 @@ namespace
 int main(int argc, char *argv[])
 {
   auto n = node::create_node("battlehill");
-  
+
   if(!n->start("127.0.0.1", 8374))
   {
     cerr << "Failed to contact daylite master" << endl;
     return 1;
   }
-  
+
   auto robot_states_pub = n->advertise("robot/robot_states");
   robot_states_pub->set_firehose(true);
 
@@ -168,7 +172,7 @@ int main(int argc, char *argv[])
   auto set_motor_states_sub = n->subscribe("robot/set_motor_state", &set_motor_state_cb);
   auto set_pid_states_sub = n->subscribe("robot/set_pid_state", &set_pid_state_cb);
   auto set_servo_states_sub = n->subscribe("robot/set_servo_state", &set_servo_state_cb);
-  
+
 
   // TODO: remove digital pin config
   config_led();
@@ -189,6 +193,7 @@ int main(int argc, char *argv[])
   robot_states.pid_states.pid_state.resize(NUM_MOTORS);
 
   unsigned long int robot_states_pub_count = 0;
+  auto last_warn_time = std::chrono::system_clock::now();
 
   for(;;)
   {
@@ -270,11 +275,24 @@ int main(int argc, char *argv[])
     robot_states.update_count = Private::Wallaby::instance()->getUpdateCount();
     robot_states_pub->publish(robot_states.bind());
 
+    // TODO: update once capacity is not actually ~voltage
+    // cuts out at 5.068215 (5.01V real)
+
+    if ((robot_states.battery_state.capacity < LOW_VOLT_WARN_THRESH))
+    {
+      auto now = std::chrono::system_clock::now();
+      if (std::chrono::duration<double>(now-last_warn_time).count() > WAV_CYCLE_TIME)
+      {
+        system("aplay /usr/share/battlehill/turn_off_wallaby.wav &");
+        last_warn_time = now;
+      }
+    }
+
     // check for new messages
     spinner::spin_once();
 
     usleep(1);
   }
-  
+
   return 0;
 }

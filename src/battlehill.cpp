@@ -41,7 +41,7 @@ static const unsigned int NUM_SERVOS = 4; // TODO: move
 static const unsigned int NUM_MOTORS = 4; //TODO: move
 static const double WAV_CYCLE_TIME = 5.0;
 float low_volt_warn_thresh = 5.5f;
-unsigned int robot_update_delay = 1000;
+unsigned int robot_update_delay = 2000;
 
 namespace
 {

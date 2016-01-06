@@ -1,9 +1,11 @@
 #include <battlecreek/analog_states.hpp>
 #include <battlecreek/battery_state.hpp>
+#include <battlecreek/battlehill_state.hpp>
 #include <battlecreek/digital_states.hpp>
 #include <battlecreek/motor_states.hpp>
 #include <battlecreek/robot_states.hpp>
 #include <battlecreek/servo_states.hpp>
+#include <battlecreek/set_battlehill_state.hpp>
 #include <battlecreek/set_digital_state.hpp>
 #include <battlecreek/set_motor_state.hpp>
 #include <battlecreek/set_servo_state.hpp>
@@ -38,7 +40,8 @@ static const unsigned int NUM_DIG = 16; // TODO: move
 static const unsigned int NUM_SERVOS = 4; // TODO: move
 static const unsigned int NUM_MOTORS = 4; //TODO: move
 static const double WAV_CYCLE_TIME = 5.0;
-static const float LOW_VOLT_WARN_THRESH = 5.5f;
+float low_volt_warn_thresh = 5.5f;
+unsigned int robot_update_delay = 2000;
 
 namespace
 {
@@ -59,6 +62,19 @@ inline bson_bind::option<T> safe_unbind(const daylite::bson &raw_msg)
   }
 
   return some(ret);
+}
+
+void set_battlehill_state_cb(const daylite::bson & raw_msg, void *)
+{
+  std::cout << "set_battlehill_state_cb()" << std::endl;
+
+  const auto msg_option = safe_unbind<set_battlehill_state>(raw_msg);
+  if(msg_option.none()) return;
+
+  auto msg = msg_option.unwrap();
+
+  if (msg.update_delay.some()) robot_update_delay = msg.update_delay.unwrap();
+  if (msg.low_voltage_threshold.some()) low_volt_warn_thresh = msg.low_voltage_threshold.unwrap();
 }
 
 void set_motor_state_cb(const daylite::bson & raw_msg, void *)
@@ -168,6 +184,10 @@ int main(int argc, char *argv[])
   auto robot_states_pub = n->advertise("robot/robot_states");
   robot_states_pub->set_firehose(true);
 
+  auto battlehill_state_pub = n->advertise("battlehill/battlehill_state");
+  battlehill_state_pub->set_firehose(true);
+
+  auto set_battlehill_state_sub = n->subscribe("battlehill/set_battlehill_state", &set_battlehill_state_cb);
   auto set_digital_state_sub = n->subscribe("robot/set_digital_state", &set_digital_state_cb);
   auto set_motor_states_sub = n->subscribe("robot/set_motor_state", &set_motor_state_cb);
   auto set_pid_states_sub = n->subscribe("robot/set_pid_state", &set_pid_state_cb);
@@ -183,6 +203,8 @@ int main(int argc, char *argv[])
 
   unsigned char * alt_read_buffer = new unsigned char[read_buffer_size];
 
+  battlecreek::battlehill_state battlehill_state;
+
   battlecreek::robot_states robot_states;
   robot_states.analog_states.value.resize(NUM_ADC);
   robot_states.digital_states.value.resize(NUM_DIG);
@@ -197,6 +219,9 @@ int main(int argc, char *argv[])
 
   for(;;)
   {
+    battlehill_state.low_voltage_threshold = low_volt_warn_thresh;
+    battlehill_state.update_delay = robot_update_delay;
+    battlehill_state_pub->publish(battlehill_state.bind());
 
     // get all robot state data from the co-processor
     wallaby->readToAltBuffer(alt_read_buffer, read_buffer_size);
@@ -278,7 +303,7 @@ int main(int argc, char *argv[])
     // TODO: update once capacity is not actually ~voltage
     // cuts out at 5.068215 (5.01V real)
 
-    if ((robot_states.battery_state.capacity < LOW_VOLT_WARN_THRESH))
+    if ((robot_states.battery_state.capacity < low_volt_warn_thresh))
     {
       auto now = std::chrono::system_clock::now();
       if (std::chrono::duration<double>(now-last_warn_time).count() > WAV_CYCLE_TIME)
@@ -291,7 +316,7 @@ int main(int argc, char *argv[])
     // check for new messages
     spinner::spin_once();
 
-    usleep(1);
+    if (robot_update_delay > 0) usleep(robot_update_delay);
   }
 
   return 0;

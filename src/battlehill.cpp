@@ -66,7 +66,7 @@ inline bson_bind::option<T> safe_unbind(const daylite::bson &raw_msg)
 
 void set_battlehill_state_cb(const daylite::bson & raw_msg, void *)
 {
-  std::cout << "set_battlehill_state_cb()" << std::endl;
+  //std::cout << "set_battlehill_state_cb()" << std::endl;
 
   const auto msg_option = safe_unbind<set_battlehill_state>(raw_msg);
   if(msg_option.none()) return;
@@ -79,7 +79,7 @@ void set_battlehill_state_cb(const daylite::bson & raw_msg, void *)
 
 void set_motor_state_cb(const daylite::bson & raw_msg, void *)
 {
-  std::cout << "set_motor_state_cb()" << std::endl;
+  //std::cout << "set_motor_state_cb()" << std::endl;
 
   const auto msg_option = safe_unbind<set_motor_state>(raw_msg);
   if(msg_option.none()) return;
@@ -111,7 +111,7 @@ void set_motor_state_cb(const daylite::bson & raw_msg, void *)
 
 void set_pid_state_cb(const daylite::bson & raw_msg, void *)
 {
-  std::cout << "set_pid_state_cb()" << std::endl;
+  //std::cout << "set_pid_state_cb()" << std::endl;
 
   const auto msg_option = safe_unbind<set_pid_state>(raw_msg);
   if(msg_option.none()) return;
@@ -129,7 +129,7 @@ void set_pid_state_cb(const daylite::bson & raw_msg, void *)
 
 void set_servo_state_cb(const daylite::bson & raw_msg, void *)
 {
-  std::cout << "set_servo_state_cb()" << std::endl;
+  //std::cout << "set_servo_state_cb()" << std::endl;
 
   const auto msg_option = safe_unbind<set_servo_state>(raw_msg);
   if(msg_option.none()) return;
@@ -149,7 +149,7 @@ void set_servo_state_cb(const daylite::bson & raw_msg, void *)
 
 void set_digital_state_cb(const daylite::bson & raw_msg, void *)
 {
-  std::cout << "set_digital_state_cb()" << std::endl;
+  //std::cout << "set_digital_state_cb()" << std::endl;
 
   const auto msg_option = safe_unbind<set_digital_state>(raw_msg);
   if(msg_option.none()) return;

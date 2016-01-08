@@ -15,16 +15,14 @@ void set_servo_enabled(int port, bool enabled)
 {
   if (port > 3) return;
 
-  std::cout << "set_servo_enabled(" << std::to_string(port) << "," << std::to_string(enabled) << ")" << std::endl;
-
   unsigned short allStop = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
 
   const unsigned short bit = 1 << (port + 4);
-  const bool currentlyEnabled = allStop & bit;
+  const bool currentlyEnabled = (~allStop) & bit;
 
   if (enabled == currentlyEnabled) return;
 
-  if (enabled)
+  if (!enabled)
   {
     allStop |= bit;
   }
@@ -33,7 +31,6 @@ void set_servo_enabled(int port, bool enabled)
     allStop &= ~bit;
   }
 
-  std::cout << "set_servo_enabled: new val=" << std::to_string(allStop) << std::endl;
   Private::Wallaby::instance()->writeRegister8b(REG_RW_MOT_SRV_ALLSTOP, allStop);
 }
 

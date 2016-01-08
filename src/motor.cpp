@@ -9,6 +9,8 @@
 #include "wallaby_p.hpp"
 #include "wallaby_regs_p.hpp"
 
+#include <iostream>
+
 static const unsigned int NUM_MOTORS = 4; // TODO: get this from somewhere
 
 typedef struct pid_coeffs_t
@@ -241,6 +243,7 @@ bool set_motor_stop(unsigned int port, bool stop)
 {
   if (port >= NUM_MOTORS) return false;
   // TODO: this needs testing
+  std::cout << "set_motor_stop(" << std::to_string(port) << "," << std::to_string(stop) << ")" << std::endl;
   unsigned int offset = fix_port(port); //s3,s2,s1,s0,m3,m2,m1,m0
   unsigned char stops = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
   if (stop)

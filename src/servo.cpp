@@ -9,9 +9,13 @@
 #include "wallaby_p.hpp"
 #include "wallaby_regs_p.hpp"
 
+#include <iostream>
+
 void set_servo_enabled(int port, bool enabled)
 {
   if (port > 3) return;
+
+  std::cout << "set_servo_enabled(" << std::to_string(port) << "," << std::to_string(enabled) << ")" << std::endl;
 
   unsigned short allStop = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
 

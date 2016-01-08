@@ -254,6 +254,7 @@ bool set_motor_stop(unsigned int port, bool stop)
   {
     stops &= ~(1<<offset);
   }
+  std::cout << "set_motor_stop: new val=" << std::to_string(stops) << std::endl;
   Private::Wallaby::instance()->writeRegister8b(REG_RW_MOT_SRV_ALLSTOP, stops);
   return true;
 }

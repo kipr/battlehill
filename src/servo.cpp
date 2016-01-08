@@ -33,6 +33,7 @@ void set_servo_enabled(int port, bool enabled)
     allStop &= ~bit;
   }
 
+  std::cout << "set_servo_enabled: new val=" << std::to_string(allStop) << std::endl;
   Private::Wallaby::instance()->writeRegister8b(REG_RW_MOT_SRV_ALLSTOP, allStop);
 }
 

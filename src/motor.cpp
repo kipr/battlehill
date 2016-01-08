@@ -9,6 +9,8 @@
 #include "wallaby_p.hpp"
 #include "wallaby_regs_p.hpp"
 
+#include <iostream>
+
 static const unsigned int NUM_MOTORS = 4; // TODO: get this from somewhere
 
 typedef struct pid_coeffs_t
@@ -233,25 +235,16 @@ bool get_motor_stop(unsigned int port, unsigned char * alt_read_buffer)
 {
   if (port >= NUM_MOTORS) return false;
   // TODO: this needs testing
-  unsigned int offset = fix_port(port); //s3,s2,s1,s0,m3,m2,m1,m0
-  return Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP, alt_read_buffer) & (1<<offset);
+  bool stopped = get_motor_mode(port, alt_read_buffer) == Motor::Inactive
+      && get_motor_direction(port, alt_read_buffer) == Motor::PassiveStop;
+  return stopped;
 }
 
 bool set_motor_stop(unsigned int port, bool stop)
 {
   if (port >= NUM_MOTORS) return false;
-  // TODO: this needs testing
-  unsigned int offset = fix_port(port); //s3,s2,s1,s0,m3,m2,m1,m0
-  unsigned char stops = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
-  if (stop)
-  {
-    stops |= (1<<offset);
-  }
-  else
-  {
-    stops &= ~(1<<offset);
-  }
-  Private::Wallaby::instance()->writeRegister8b(REG_RW_MOT_SRV_ALLSTOP, stops);
+  set_motor_mode(port, Motor::Inactive);
+  set_motor_direction(port, Motor::PassiveStop);
   return true;
 }
 

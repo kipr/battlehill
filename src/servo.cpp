@@ -9,6 +9,8 @@
 #include "wallaby_p.hpp"
 #include "wallaby_regs_p.hpp"
 
+#include <iostream>
+
 void set_servo_enabled(int port, bool enabled)
 {
   if (port > 3) return;
@@ -16,11 +18,8 @@ void set_servo_enabled(int port, bool enabled)
   unsigned short allStop = Private::Wallaby::instance()->readRegister8b(REG_RW_MOT_SRV_ALLSTOP);
 
   const unsigned short bit = 1 << (port + 4);
-  const bool currentlyEnabled = allStop & bit;
 
-  if (enabled == currentlyEnabled) return;
-
-  if (enabled)
+  if (!enabled)
   {
     allStop |= bit;
   }

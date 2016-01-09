@@ -260,5 +260,10 @@ unsigned long int Wallaby::getUpdateCount() const
   return update_count_;
 }
 
+unsigned short Wallaby::getFirmwareVersion(unsigned char * alt_read_buffer)
+{
+  return Private::Wallaby::instance()->readRegister16b(REG_R_VERSION_H, alt_read_buffer);
+}
+
 
 } /* namespace Private */

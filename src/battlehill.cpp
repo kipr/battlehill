@@ -228,6 +228,8 @@ int main(int argc, char *argv[])
 
     // update all of the robot state data
 
+    robot_states.firmware_version = Private::Wallaby::getFirmwareVersion(alt_read_buffer);
+
     // accelerometer
     robot_states.imu_state.accel_state.x = accel_x(alt_read_buffer);
     robot_states.imu_state.accel_state.y = accel_y(alt_read_buffer);

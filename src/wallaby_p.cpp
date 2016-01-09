@@ -75,7 +75,7 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
   count += 1;
 
   write_buffer_[0] = 'J';        //start
-  write_buffer_[1] = 2;          // version 2
+  write_buffer_[1] = WALLABY_SPI_VERSION;          // version 2
   write_buffer_[2] = count;
   write_buffer_[buffer_size_-1] = 'S'; // stop
 
@@ -258,6 +258,11 @@ void Wallaby::readToAltBuffer(unsigned char * alt_read_buffer, unsigned int buff
 unsigned long int Wallaby::getUpdateCount() const
 {
   return update_count_;
+}
+
+unsigned short Wallaby::getFirmwareVersion(unsigned char * alt_read_buffer)
+{
+  return Private::Wallaby::instance()->readRegister16b(REG_R_VERSION_H, alt_read_buffer);
 }
 
 

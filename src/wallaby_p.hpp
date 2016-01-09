@@ -36,6 +36,9 @@ public:
 
 	virtual ~Wallaby();
 
+	static unsigned short getFirmwareVersion(unsigned char * alt_read_buffer = nullptr);
+
+
 private:
 	Wallaby();
 	bool transfer(unsigned char * alt_read_buffer = nullptr);

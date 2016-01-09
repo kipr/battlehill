@@ -75,7 +75,7 @@ bool Wallaby::transfer(unsigned char * alt_read_buffer)
   count += 1;
 
   write_buffer_[0] = 'J';        //start
-  write_buffer_[1] = 2;          // version 2
+  write_buffer_[1] = WALLABY_SPI_VERSION;          // version 2
   write_buffer_[2] = count;
   write_buffer_[buffer_size_-1] = 'S'; // stop
 

@@ -24,19 +24,19 @@ static pid_coeffs pid_coeff_array[NUM_MOTORS] = {
     {2000,200,1,1000,1000,1000},
     {2000,200,1,1000,1000,1000}};
 
-static int goal_pos_array_per_second[NUM_MOTORS] = {0,0,0,0};
-static int goal_vel_array_per_tic[NUM_MOTORS] = {0,0,0,0};
+static int goal_pos_array[NUM_MOTORS] = {0,0,0,0};
+static int goal_vel_array[NUM_MOTORS] = {0,0,0,0};
 
 static int update_Hz = 250;
 
-int per_tic_to_per_second(int per_tic)
+int per_tick_small_to_large(int val)
 {
-  return per_tic * update_Hz;
+  return val * update_Hz;
 }
 
-int per_second_to_per_tic(int per_second)
+int per_tick_large_to_small(int val)
 {
-  return per_second / update_Hz;
+  return val / update_Hz;
 }
 
 // TODO: this is a hack but the hardware timers are making it hard to easily swap motors 2,3 today
@@ -91,7 +91,7 @@ int get_motor_bemf(unsigned int port, unsigned char * alt_read_buffer)
 {
   if (port >= NUM_MOTORS) return 0;
   int val = Private::Wallaby::instance()->readRegister32b(REG_RW_MOT_0_B3 + 4 * fix_port(port), alt_read_buffer);
-  return per_tic_to_per_second(val); // TODO: cleaner place for scaling
+  return per_tick_large_to_small(val); // TODO: cleaner place for scaling
 }
 
 int get_motor_bemf_vel(unsigned int port, unsigned char * alt_read_buffer)
@@ -166,7 +166,7 @@ int get_motor_goal_velocity(unsigned int port, unsigned char * alt_read_buffer)
 {
   if (port >= NUM_MOTORS) return 0; // TODO
 
-  return goal_vel_array_per_tic[port];
+  return goal_vel_array[port];
 }
 
 bool set_motor_goal_velocity(unsigned int port, int goal_velocity)
@@ -179,7 +179,7 @@ bool set_motor_goal_velocity(unsigned int port, int goal_velocity)
   unsigned int goal_addy = REG_RW_MOT_0_SP_H + 2 * fix_port(port); // TODO: 32 bit?
   Private::Wallaby::instance()->writeRegister16b(goal_addy, static_cast<signed short>(goal_velocity));
 
-  goal_vel_array_per_tic[port] = goal_velocity;
+  goal_vel_array[port] = goal_velocity;
 
   return true;
 }
@@ -188,7 +188,7 @@ int get_motor_goal_position(unsigned int port, unsigned char * alt_read_buffer)
 {
   if (port >= NUM_MOTORS) return 0; // TODO
 
-  return goal_pos_array_per_second[port];
+  return goal_pos_array[port];
 }
 
 bool set_motor_goal_position(unsigned int port, int goal_position)
@@ -198,9 +198,9 @@ bool set_motor_goal_position(unsigned int port, int goal_position)
   // TODO
   // TODO: logic to not set goals if they match the current value (in co-proc firmware maybe?)
   unsigned int goal_addy = REG_W_MOT_0_GOAL_B3 + 4 * fix_port(port);
-  Private::Wallaby::instance()->writeRegister32b(goal_addy, per_second_to_per_tic(goal_position));
+  Private::Wallaby::instance()->writeRegister32b(goal_addy, per_tick_small_to_large(goal_position));
 
-  goal_pos_array_per_second[port] = goal_position;
+  goal_pos_array[port] = goal_position;
 
   return true;
 }

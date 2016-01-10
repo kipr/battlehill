@@ -48,11 +48,11 @@ bool get_servo_enabled(int port, unsigned char * alt_read_buffer)
 bool set_servo_position(int port, unsigned short position)
 {
   if (port > 3) return false;
-  if (position > 1023) position = 1023;
+  if (position > 2047) position = 2047;
 
-  // map a 10 bit (0-1023) position to  1500 +/- (0 to 90) degrees*10
+  // map a 10 bit (0-2047) position to  1500 +/- (0 to 90) degrees*10
   // or    1500 +/- 900  or  [600, 2400]
-  unsigned short val =  1500.0 + 1800.0 * ((double)position / 1023.0) - (1800.0 / 2.0);
+  unsigned short val =  1500.0 + 1800.0 * ((double)position / 2047.0) - (1800.0 / 2.0);
 
   unsigned char address = REG_RW_SERVO_0_H + 2 * port;
   Private::Wallaby::instance()->writeRegister16b(address, val);
@@ -68,10 +68,10 @@ unsigned short get_servo_position(int port, unsigned char * alt_read_buffer)
   const unsigned short position = Private::Wallaby::instance()->readRegister16b(address, alt_read_buffer);
 
   double degrees = ((double)position - 1500.0) / 10.0; // [-90, 90]
-  double dval = (degrees + 90.0)  * 1023.0 / 180.0; // [0, 1023]
+  double dval = (degrees + 90.0)  * 2047.0 / 180.0; // [0, 2047]
 
   if (dval < 0.0) dval = 0.0;
-  if (dval > 1023.0) dval = 1023.01;
+  if (dval > 2047.0) dval = 2047.01;
   unsigned short val = static_cast<unsigned short>(dval);
 
   return val;
